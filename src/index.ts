@@ -51,12 +51,32 @@ app.get("/lanches", (req: Request, res: Response) => {
 app.post("/pedidos", (req: Request, res: Response) => {
   // resgatar as informações da requisição
   // RECOMENDADO, pois, você só usa o que precisa da requisição
-  const { id_cliente, quantidade, nome_cliente, endereco, telefone } = req.body;
+  const { id_lanche, quantidade, nome_cliente, endereco, telefone } = req.body;
+
+  // validar se o lanche com id existe na lista de lanches
+  let lanche;
+
+  for (const l of lanches) {
+    if (l.id === id_lanche) {
+      lanche = l;
+      break;
+    }
+  }
+
+  // Se não existir, retorna um erro dizendo que não existe
+  if (!lanche) {
+    res.status(404).send("Lanche não encontrado.");
+    return;
+  }
+
+  // Se existir, segue a criação do pedido
+  const nome_lanche = lanche.nome;
 
   const pedido = {
     id: pedidos.length + 1,
     status: "criado",
-    id_cliente,
+    id_lanche,
+    nome_lanche,
     quantidade,
     nome_cliente,
     endereco,
@@ -76,7 +96,17 @@ app.post("/pedidos", (req: Request, res: Response) => {
   res.send(pedido);
 });
 
+// Buscar um pedido pelo seu ID
 // GET /pedidos/id/status
+app.get("/pedidos/:id/status", (req: Request, res: Response) => {
+  // como pegar o id do pedido na requisição?
+
+  // Buscar o pedido com o id da requisição
+
+  // Se o pedido não existir, retorna um erro
+
+  // Se existir, retorna o pedido completo
+});
 
 // PATCH /pedidos/id -> endereço entrega
 
