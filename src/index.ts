@@ -134,6 +134,12 @@ app.get("/pedidos/:id/status", (req: Request, res: Response) => {
   res.send({ status: pedido.status });
 });
 
+// A lista com todos os pedidos
+// GET /pedidos
+app.get("/pedidos", (req: Request, res: Response) => {
+  res.send(pedidos);
+});
+
 // Altera alguns dados do recurso
 // PATCH /pedidos/id -> endereço entrega
 app.patch("/pedidos/:id", (req: Request, res: Response) => {
@@ -149,21 +155,78 @@ app.patch("/pedidos/:id", (req: Request, res: Response) => {
 
   // Buscar o pedido e caso encontre, alterar o endereço
   for (const p of pedidos) {
-    if (p.id === id_pedido){
+    if (p.id === id_pedido) {
       // Se o endereço for válido e diferente do endereço atual
-      if(!endereco || p.endereco === endereco) {
-        res.status(400).send({error: "Endereço inválido."});
+      if (!endereco || p.endereco === endereco) {
+        res.status(400).send({ error: "Endereço inválido." });
         return;
       }
       p.endereco = endereco;
       // Retornar o pedido completo com os dados alterados
-      res.send(p)
+      res.send(p);
       break;
     }
   }
 });
 
+// Eu recebo todos os dados e modifico todo o pedido
 // PUT /pedidos/id -> alterar o lanche
+app.put("/pedidos/:id", (req: Request, res: Response) => {
+  // resgatar as informações da requisição
+  // RECOMENDADO, pois, você só usa o que precisa da requisição
+  const { id_lanche, quantidade, nome_cliente, endereco, telefone } = req.body;
+
+  const id_pedido = parseInt(req.params.id, 10);
+
+  // buscar o pedido com o id
+  const indexPedido = pedidos.findIndex((pedido) => pedido.id === id_pedido);
+
+  // valida se o pedido foi encontrado
+  if (indexPedido === -1) {
+    res.status(404).send({ error: "Pedido não encontrado." });
+    return;
+  }
+
+  const pedido = pedidos[indexPedido];
+
+  // se ele for encontrado, valida se o id do lanche é diferente
+  if (pedido.id_lanche !== id_lanche) {
+    // buscar o lanche novo
+    const lanche = lanches.find((l) => l.id === id_lanche);
+
+    // se o lanche não existir, retorna erro 400 - Id do lanche inválido
+    // Clausula Guarda
+    if (!lanche) {
+      res
+        .status(400)
+        .send({ error: `Lanche com o id ${id_lanche} não foi encontrado.` });
+      return;
+    }
+
+    pedido.id_lanche = id_lanche;
+    pedido.nome_lanche = lanche.nome;
+  }
+
+  if (pedido.quantidade !== quantidade) {
+    pedido.quantidade = quantidade;
+  }
+
+  if (pedido.nome_cliente !== nome_cliente) {
+    pedido.nome_cliente = nome_cliente;
+  }
+  if (pedido.endereco !== endereco) {
+    pedido.endereco = endereco;
+  }
+
+  if (pedido.telefone !== telefone) {
+    pedido.telefone = telefone;
+  }
+
+  // se encontrar, altera todos os dados do pedido
+  pedidos[indexPedido] = { ...pedido };
+
+  res.send(pedidos[indexPedido]);
+});
 
 // DELETE /pedidos/id -> cancelar um pedido
 
