@@ -27,7 +27,18 @@ const lanches = [
   },
 ];
 
-const pedidos = [];
+type Pedido = {
+  id: number;
+  status: string;
+  id_lanche: number;
+  nome_lanche: string;
+  quantidade: number;
+  nome_cliente: string;
+  endereco: string;
+  telefone: string;
+};
+
+const pedidos: Pedido[] = [];
 
 // const resourceHello = (req: Request, res: Response) => {
 //   console.log(req.ip);
@@ -99,13 +110,28 @@ app.post("/pedidos", (req: Request, res: Response) => {
 // Buscar um pedido pelo seu ID
 // GET /pedidos/id/status
 app.get("/pedidos/:id/status", (req: Request, res: Response) => {
-  // como pegar o id do pedido na requisição?
+  // Recupero o id do pedido na requisição
+  const { id } = req.params;
+
+  // converto o id que é string para um número inteiro
+  const id_pedido = parseInt(id, 10);
 
   // Buscar o pedido com o id da requisição
+  let pedido;
+  for (const p of pedidos) {
+    if (p.id === id_pedido) {
+      pedido = p;
+      break;
+    }
+  }
 
   // Se o pedido não existir, retorna um erro
-
+  if (!pedido) {
+    res.status(404).send({error: "Pedido não encontrado"});
+    return;
+  }
   // Se existir, retorna o pedido completo
+  res.send({ status: pedido.status });
 });
 
 // PATCH /pedidos/id -> endereço entrega
