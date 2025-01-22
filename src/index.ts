@@ -58,10 +58,12 @@ app.get("/lanches", (req: Request, res: Response) => {
   res.send(lanches);
 });
 
+// Cria um pedido novo
 // POST /pedidos
 app.post("/pedidos", (req: Request, res: Response) => {
   // resgatar as informações da requisição
   // RECOMENDADO, pois, você só usa o que precisa da requisição
+  // É feita uma sanitização do corpo da requisição
   const { id_lanche, quantidade, nome_cliente, endereco, telefone } = req.body;
 
   // validar se o lanche com id existe na lista de lanches
@@ -228,7 +230,25 @@ app.put("/pedidos/:id", (req: Request, res: Response) => {
   res.send(pedidos[indexPedido]);
 });
 
+// Exclusão do pedido - Exclusão Lógica
 // DELETE /pedidos/id -> cancelar um pedido
+app.delete("/pedidos/:id", (req: Request, res: Response) => {
+  const id_pedido = parseInt(req.params.id, 10);
+
+  // Exclusão física - Apaga o pedido do array
+  // const indexPedido = pedidos.findIndex((p) => p.id === id_pedido);
+  // pedidos.splice(indexPedido, 1);
+  // res.status(204).send();
+
+  // Exclusão lógica - Altera o status para cancelado
+  for (const pedido of pedidos) {
+    if (pedido.id === id_pedido) {
+      pedido.status = "cancelado";
+      res.status(204).send();
+      break;
+    }
+  }
+});
 
 const PORT = 3000;
 
