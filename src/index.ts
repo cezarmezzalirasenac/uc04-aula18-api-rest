@@ -139,7 +139,26 @@ app.get("/pedidos/:id/status", (req: Request, res: Response) => {
 // A lista com todos os pedidos
 // GET /pedidos
 app.get("/pedidos", (req: Request, res: Response) => {
-  res.send(pedidos);
+  // paginação de pedidos com query params
+  const pagina = req.query.pagina as string;
+  const status = req.query.status as string;
+  let numeroPagina = 1;
+
+  if (pagina) {
+    numeroPagina = parseInt(pagina, 10);
+  }
+  const itensPorPagina = 5;
+  const indexFinal = itensPorPagina * numeroPagina;
+  const indexInicial = indexFinal - itensPorPagina;
+  let paginaPedidos: Pedido[];
+  if (status) {
+    paginaPedidos = pedidos
+      .filter((p) => p.status === status)
+      .slice(indexInicial, indexFinal);
+  } else {
+    paginaPedidos = pedidos.slice(indexInicial, indexFinal);
+  }
+  res.send(paginaPedidos);
 });
 
 // Altera alguns dados do recurso
